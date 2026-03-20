@@ -178,8 +178,22 @@ export const refreshToken = async (req,res)=>{
 
 export const getMe = async (req,res)=>{
   try {
-    
+    const user = await User.findById(req.userId).select("-password");
+
+    if(!user){
+      return res.status(404).josn({
+        success:false,
+        message:"User not found"
+      })
+    };
+    res.status(200).josn({
+      success:true,
+      user
+    });
   } catch (error) {
-    
+    return res.status(500).json({
+      success:false,
+      message:"Internal server error"
+    })
   }
 }
