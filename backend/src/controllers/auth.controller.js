@@ -96,3 +96,45 @@ export const loginController = async (req, res) => {
     });
   }
 };
+
+export const refreshToken = async (req,res)=>{
+  try {
+    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    
+    if(!incomingRefreshToken){
+      return res.status(400).json({
+        success:false,
+        message:"Refresh token not found"
+      })
+    }
+    //vrify refresh token 
+    const decodeedtoken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN
+    );
+
+    const user = await User.findById(decodeedtoken._id);
+
+    if(!user){
+      return res.status(401).json({
+        success:false,
+        message:"Invalid refresh token"
+      })
+    }
+
+    //generte new access token
+    const newAccessToken = user. jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN, {
+      expiresIn: "15m",
+    });
+      return res.status(200).json({
+        success:true,
+        accessToken:newAccessToken
+      })
+   
+  } catch (error) {
+     return res.status(200).json({
+      success:false,
+      message:"Invalid or ed=xpired resfesrsh otken"
+    })
+  }
+}
