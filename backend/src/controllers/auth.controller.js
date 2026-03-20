@@ -175,3 +175,11 @@ export const refreshToken = async (req,res)=>{
     })
   }
 }
+
+export const getMe = async (req,res)=>{
+  try {
+    
+  } catch (error) {
+    
+  }
+}
