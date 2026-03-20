@@ -97,6 +97,43 @@ export const loginController = async (req, res) => {
   }
 };
 
+export const logoutController = async (req,res)=>{
+  try {
+    //find refersh token from body and cookie
+    const refreshToken = req.body?.refreshToken || req.cookie?.refreshToken;
+
+    //if not refreshtoken
+    if(!refreshToken){
+      return res.status(400).json({
+        success:false,
+        message:"Unauthorized request"
+      })
+    }
+
+    //find user from database and remove refresh token from the db
+    await User.updateOne(
+      {
+        refreshToken
+      },
+      {$unset:{refreshToken:""}}
+    );
+
+
+    //logout
+    return res.status(200)
+    .clearCookie("refreshtoken")
+    .josn({
+      success:false,
+      message:"Logout successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success:false,
+      message:"Logout failed"
+    })
+  }
+}
+
 export const refreshToken = async (req,res)=>{
   try {
     const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
@@ -134,7 +171,7 @@ export const refreshToken = async (req,res)=>{
   } catch (error) {
      return res.status(200).json({
       success:false,
-      message:"Invalid or ed=xpired resfesrsh otken"
+      message:"Invalid or expired refresh token"
     })
   }
 }
