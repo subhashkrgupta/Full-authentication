@@ -197,3 +197,50 @@ export const getMe = async (req,res)=>{
     })
   }
 }
+
+export const UpdateProfile = async (req,res)=>{
+  try {
+    const userId = req.user.id //from the middleware
+
+    const { name ,email ,password} = req.body;
+
+    //check if user exists
+    const user = await findById(userId);
+    if(!user){
+      return res.status(404).josn({
+        success:false,
+        message:"user not found"
+      })
+    }
+
+    //update filed
+
+    if(name) user.name =name;
+    if(email) user.email =email;
+
+    //password update 
+    if(password){
+      const bcrypt = await import("bcryptjs");
+      const hashedPassword = await bcrypt.default.hash(password,10)
+      user.password = hashedPassword
+    }
+
+    //save updated user
+    await user.save();
+
+    //remove sensitive data
+    const updatedUser = user.toObject();
+    delete updatedUser.password;
+
+    res.status(200).json({
+      success:true,
+      message:"Profile updated successfully",
+      user:updatedUser
+    })
+  } catch (error) {
+    res.status(500).josn({
+      success:false,
+      message:"Internal server error"
+    })
+  }
+}
