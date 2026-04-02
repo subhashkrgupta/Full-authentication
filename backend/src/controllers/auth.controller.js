@@ -244,3 +244,26 @@ export const UpdateProfile = async (req,res)=>{
     })
   }
 }
+
+export const passwordReset = async (req,res)=>{
+  try {
+    const { email , newPassword} = req.body;
+    //check if user exists
+    const user = await User.findOne ({ email });
+    if(!user){
+      return res.status(404).json({
+        success:false,  
+        message:"User not found"
+      })
+    }   
+    //hash new password
+    const hashedPassword = await bcrypt.hash(newPassword,10);
+    user.password = hashedPassword;
+    await user.save();    
+} catch (error) {
+    res.status(500).json({
+      success:false,
+      message:"Internal server error"
+    })
+  } 
+}
